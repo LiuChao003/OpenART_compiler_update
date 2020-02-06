@@ -462,6 +462,11 @@
               <FileType>1</FileType>
               <FilePath>applications\main.c</FilePath>
             </File>
+            <File>
+              <FileName>usb_cdc_test_main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\applications\usb_cdc_test_main.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -567,7 +572,7 @@
                   <MiscControls> --c99 --gnu</MiscControls>
                   <Define> </Define>
                   <Undefine> </Undefine>
-                  <IncludePath> </IncludePath>
+                  <IncludePath></IncludePath>
                 </VariousControls>
               </Cads>
               <Aads>
@@ -1706,7 +1711,7 @@
                   <MiscControls></MiscControls>
                   <Define> </Define>
                   <Undefine> </Undefine>
-                  <IncludePath> </IncludePath>
+                  <IncludePath></IncludePath>
                 </VariousControls>
               </Cads>
               <Aads>
