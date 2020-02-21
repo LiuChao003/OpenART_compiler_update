@@ -1,15 +1,5 @@
 [
  {
-  "path": "/packages/iot/at_device", 
-  "ver": "v2.0.1", 
-  "name": "AT_DEVICE"
- }, 
- {
-  "path": "/packages/iot/wiznet", 
-  "ver": "latest", 
-  "name": "WIZNET"
- }, 
- {
   "path": "/packages/language/micropython", 
   "ver": "latest", 
   "name": "MICROPYTHON"
