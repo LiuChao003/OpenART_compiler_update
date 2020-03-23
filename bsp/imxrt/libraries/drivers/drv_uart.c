@@ -652,7 +652,7 @@ static rt_err_t imxrt_control(struct rt_serial_device *serial, int cmd, void *ar
         NVIC_SetPriority(uart->irqn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 4, 0));
         EnableIRQ(uart->irqn);
         break;
-
+struct rt_serial_rx_fifo* rx_fifo;
 #if defined(RT_SERIAL_USING_DMA) && defined(BSP_USING_DMA)
     case RT_DEVICE_CTRL_CONFIG:
 
@@ -667,13 +667,13 @@ static rt_err_t imxrt_control(struct rt_serial_device *serial, int cmd, void *ar
         break;
 #endif
     case RT_DEVICE_UART_ANY:
-//        struct rt_serial_rx_fifo* rx_fifo;
-//        rx_fifo = (struct rt_serial_rx_fifo*) serial->serial_rx;
-//        RT_ASSERT(rx_fifo != RT_NULL);
-//        {
-//           ret = (rx_fifo->put_index >= rx_fifo->get_index)? (rx_fifo->put_index - rx_fifo->get_index):
-//           (serial->config.bufsz - (rx_fifo->get_index - rx_fifo->put_index));           
-//        }
+        
+        rx_fifo = (struct rt_serial_rx_fifo*) serial->serial_rx;
+        RT_ASSERT(rx_fifo != RT_NULL);
+        {
+           ret = (rx_fifo->put_index >= rx_fifo->get_index)? (rx_fifo->put_index - rx_fifo->get_index):
+           (serial->config.bufsz - (rx_fifo->get_index - rx_fifo->put_index));           
+        }
         break;
     case RT_DEVICE_UART_SBK:
         uart->uart_base->CTRL |= LPUART_CTRL_SBK_MASK;
