@@ -632,7 +632,8 @@ static rt_err_t imxrt_configure(struct rt_serial_device *serial, struct serial_c
 static rt_err_t imxrt_control(struct rt_serial_device *serial, int cmd, void *arg)
 {
     struct imxrt_uart *uart;
-
+    rt_err_t ret;
+    ret = RT_EOK;
     RT_ASSERT(serial != RT_NULL);
     uart = rt_container_of(serial, struct imxrt_uart, serial);
 
@@ -665,9 +666,20 @@ static rt_err_t imxrt_control(struct rt_serial_device *serial, int cmd, void *ar
         }
         break;
 #endif
+    case RT_DEVICE_UART_ANY:
+//        struct rt_serial_rx_fifo* rx_fifo;
+//        rx_fifo = (struct rt_serial_rx_fifo*) serial->serial_rx;
+//        RT_ASSERT(rx_fifo != RT_NULL);
+//        {
+//           ret = (rx_fifo->put_index >= rx_fifo->get_index)? (rx_fifo->put_index - rx_fifo->get_index):
+//           (serial->config.bufsz - (rx_fifo->get_index - rx_fifo->put_index));           
+//        }
+        break;
+    case RT_DEVICE_UART_SBK:
+        uart->uart_base->CTRL |= LPUART_CTRL_SBK_MASK;
+        break;
     }
-
-    return RT_EOK;
+    return ret;
 }
 
 static int imxrt_putc(struct rt_serial_device *serial, char ch)

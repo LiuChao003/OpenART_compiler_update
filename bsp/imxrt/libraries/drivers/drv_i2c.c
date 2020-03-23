@@ -251,8 +251,19 @@ static rt_size_t imxrt_i2c_mst_xfer(struct rt_i2c_bus_device *bus,
                 break;
             }
 
-            while (LPI2C_MasterGetStatusFlags(imxrt_i2c->I2C) & kLPI2C_MasterNackDetectFlag)
+			// while((LPI2C_MasterGetStatusFlags(imxrt_i2c->I2C) & kLPI2C_MasterBusBusyFlag))
+			// {
+			// }
+            if(LPI2C_MasterWaitForTxFifoAllEmpty(imxrt_i2c->I2C) != kStatus_Success)
             {
+                i = 0;
+                break;
+            }
+			
+			if (LPI2C_MasterGetStatusFlags(imxrt_i2c->I2C) & kLPI2C_MasterNackDetectFlag)
+            {
+			    i = 0;
+                break;
             }
 
             if (LPI2C_MasterSend(imxrt_i2c->I2C, imxrt_i2c->msg[i].buf, imxrt_i2c->msg[i].len) != kStatus_Success)
