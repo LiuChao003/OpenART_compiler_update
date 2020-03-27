@@ -11,7 +11,7 @@ RT-Thread 为广大开发者提供了 VSCode 最好用的 MicroPython 插件 来
 - 支持在内存中快速运行代码文件功能
 - 支持运行代码片段功能
 - 支持多款主流 MicroPython 开发板
-- 支持 windows 及 ubuntu 操作系统
+- 支持 Windows、Ubuntu、Mac 操作系统
 
 ### 安装 IDE 开发环境
 
@@ -21,4 +21,4 @@ RT-Thread 为广大开发者提供了 VSCode 最好用的 MicroPython 插件 来
 
 可通过查看如下文档进一步了解并使用 RT-Thread MicroPython IDE：
 
-- [RT-Thread MicroPython develop environment](https://marketplace.visualstudio.com/items?itemName=RT-Thread.rt-thread-micropython)
+- [RT-Thread MicroPython Develop Environment](https://marketplace.visualstudio.com/items?itemName=RT-Thread.rt-thread-micropython)

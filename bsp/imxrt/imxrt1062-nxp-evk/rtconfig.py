@@ -1,4 +1,5 @@
 import os
+import sys
 
 # toolchains options
 ARCH='arm'
@@ -18,10 +19,9 @@ if  CROSS_TOOL == 'gcc':
 elif CROSS_TOOL == 'keil':
     PLATFORM    = 'armcc'
     EXEC_PATH   = r'C:/Keil_v5'
-    #EXEC_PATH   = r'D:/Keil_v5'
 elif CROSS_TOOL == 'iar':
     PLATFORM    = 'iar'
-    EXEC_PATH   = r'C:/Program Files (x86)/IAR Systems/Embedded Workbench 8.1'
+    EXEC_PATH   = r'C:/Program Files (x86)/IAR Systems/Embedded Workbench 8.0'
 
 if os.getenv('RTT_EXEC_PATH'):
     EXEC_PATH = os.getenv('RTT_EXEC_PATH')
@@ -42,7 +42,7 @@ if PLATFORM == 'gcc':
     OBJCPY = PREFIX + 'objcopy'
     STRIP = PREFIX + 'strip'
 
-    DEVICE = ' -mcpu=' + CPU + ' -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections'
+    DEVICE = ' -mcpu=' + CPU + ' -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections'
     CFLAGS = DEVICE + ' -Wall -D__FPU_PRESENT -eentry'
     AFLAGS = ' -c' + DEVICE + ' -x assembler-with-cpp -Wa,-mimplicit-it=thumb -D__START=entry'
     LFLAGS = DEVICE + ' -lm -lgcc -lc' + ' -nostartfiles -Wl,--gc-sections,-Map=rtthread.map,-cref,-u,Reset_Handler -T board/linker_scripts/link.lds'
@@ -57,8 +57,7 @@ if PLATFORM == 'gcc':
     else:
         CFLAGS += ' -O2 -Os'
 
-    POST_ACTION = OBJCPY + ' -O binary $TARGET rtthread.bin\n' + SIZE + ' $TARGET \n'
-    # POST_ACTION = OBJCPY + ' -O ihex $TARGET rtthread-gcc.hex\n' + SIZE + ' $TARGET \n'
+    POST_ACTION = OBJCPY + ' -O binary --remove-section=.boot_data --remove-section=.image_vertor_table --remove-section=.ncache $TARGET rtthread.bin\n' + SIZE + ' $TARGET \n'
 
     # module setting 
     CXXFLAGS = ' -Woverloaded-virtual -fno-exceptions -fno-rtti '
@@ -79,9 +78,9 @@ elif PLATFORM == 'armcc':
     DEVICE = ' --cpu ' + CPU + '.fp.sp'
     CFLAGS = DEVICE + ' --apcs=interwork'
     AFLAGS = DEVICE
-    LFLAGS = DEVICE + ' --libpath "' + EXEC_PATH + '/ARM/ARMCC/lib" --info sizes --info totals --info unused --info veneers --list rtthread.map --scatter "board\linker_scripts\link.sct"'
+    LFLAGS = DEVICE + ' --libpath "' + EXEC_PATH + '\ARM\ARMCC\lib" --info sizes --info totals --info unused --info veneers --list rtthread.map --scatter "board\linker_scripts\link.sct"'
 
-    CFLAGS += ' --diag_suppress=66,1296,186'
+    CFLAGS += ' --diag_suppress=66,1296,186,6314'
     CFLAGS += ' -I' + EXEC_PATH + '/ARM/RV31/INC'
     LFLAGS += ' --libpath ' + EXEC_PATH + '/ARM/RV31/LIB'
 
@@ -96,9 +95,8 @@ elif PLATFORM == 'armcc':
     CXXFLAGS = CFLAGS
     CFLAGS += ' --c99'
 
-    # POST_ACTION = 'fromelf -z $TARGET'
-    POST_ACTION = 'fromelf --bin $TARGET --output rtthread.bin \nfromelf -z $TARGET'    
-    # POST_ACTION = 'fromelf --i32combined $TARGET --output="rtthread-mdk.hex" \nfromelf -z $TARGET'
+    POST_ACTION = 'fromelf -z $TARGET'
+    # POST_ACTION = 'fromelf --bin $TARGET --output rtthread.bin \nfromelf -z $TARGET'
 
 elif PLATFORM == 'iar':
     CC = 'iccarm'
@@ -150,3 +148,10 @@ elif PLATFORM == 'iar':
 
     EXEC_PATH = EXEC_PATH + '/arm/bin/'
     POST_ACTION = 'ielftool --bin $TARGET rtthread.bin'
+
+def dist_handle(BSP_ROOT):
+    cwd_path = os.getcwd()
+    sys.path.append(os.path.join(os.path.dirname(BSP_ROOT), 'tools'))
+    from sdk_dist import dist_do_building
+    dist_do_building(BSP_ROOT)
+    

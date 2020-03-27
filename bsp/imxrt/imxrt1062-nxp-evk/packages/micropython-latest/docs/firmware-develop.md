@@ -1,6 +1,6 @@
 ## MicroPython 固件开发指南
 
-如果手上没有官方支持固件的开发板，就需要自己来动手制作 MicroPython 固件了。由于 RT-Thread 官方提供了 MicroPython 软件包，并且 MicroPython 底层和硬件绑定时对接了 RT-Thread 驱动框架，所以我们可以很方便地在运行了 RT-Thread 的板卡上将  MicroPython 跑起来。
+如果手上没有官方支持固件的开发板，就需要自己来动手制作 MicroPython 固件了。由于 RT-Thread 官方提供了 [MicroPython 软件包](https://github.com/RT-Thread-packages/micropython)，并且 MicroPython 底层和硬件绑定时对接了 RT-Thread 驱动框架，因此可以很方便地在运行了 RT-Thread 的板卡上将 MicroPython 跑起来。
 
 **注意**：RT-Thread MicroPython 需要运行在 **RT-Thread 3.0** 版本以上。
 
@@ -17,7 +17,7 @@ RT-Thread MicroPython mini 版本占用资源最大不超过：
 
 ### 获取 MicroPython 软件包
 
-先使用 `pkgs --upgrade` 命令更新软件包列表，然后通过 env 工具选中 MicroPython 软件包，最后使用 `pkgs -update` 命令将软件包拉取到本地。
+先使用 `pkgs --upgrade` 命令更新软件包列表，然后通过 env 工具选中 MicroPython 软件包，最后使用 `pkgs --update` 命令将软件包拉取到本地。
 
 ![select_mpy_package](assets/select_mpy_package.png)
 
@@ -43,22 +43,25 @@ RT-Thread MicroPython mini 版本占用资源最大不超过：
 
 ![config_runtime](assets/config_runtime.png)
 
-### 在根目录挂载文件系统
+### 在系统根目录挂载文件系统
 
-最后要确保系统中 `/` 目录挂载了文件系统。有了文件系统，后续才能使用 [**MicroPython 开发环境**](https://marketplace.visualstudio.com/items?itemName=RT-Thread.rt-thread-micropython) 将 Python 代码文件同步到板卡中来运行，本次示例中将使用 elm-fat 文件系统，需要对系统进行如下配置：
+最后要确保系统中 `/` 目录挂载了文件系统。有了文件系统，后续才能使用 [**MicroPython 开发环境**](https://marketplace.visualstudio.com/items?itemName=RT-Thread.rt-thread-micropython) 将 Python 代码文件同步到板卡中来运行。
+
+1. 打开 MicroPython 的文件同步功能选项
+
+![open filesync option](assets/open_filesync_option.png)
+
+2. 本次示例使用的开发板，文件系统存放在 SPI Flash 上，BSP 对该存储设备的支持已经做好了，在这里只需开启 elm-fat 文件系统即可，对系统进行如下配置：
 
 ![mount_fs](assets/mount_fs.png)
 
 配置完成后，记得要使用 `scons --target=mkd5` 重新生成工程，使配置在工程中生效。
 
+当你在自己的板卡上运行 MicroPython 时，你可以自由选择文件系统的存储介质，但是有一点很重要，文件系统要被挂载到根目录 / 上，这样才能保证在后续使用 MicroPython IDE 进行文件传输时不会出错。
+
 ### 在 main 线程中启动 MicroPython 
 
-最后要在 main 线程中启动 MicroPython，需要完成的功能如下：
-
-1. 挂载文件系统到 `/` 目录
-2. 启动 MicroPython
-
-上述功能可以通过修改 main 函数来实现，修改 main 代码如下所示：
+最后要在 main 线程中启动 MicroPython，代码修改如下所示：
 
 ```c
 #include <rtthread.h>
@@ -67,42 +70,43 @@ RT-Thread MicroPython mini 版本占用资源最大不超过：
 #include <dfs_fs.h>
 #include <rtdevice.h>
 
+/* 文件系统所在分区名称，根据实际情况填写 */
 #define FS_PARTITION_NAME     "W25Q128"
-
-/* defined the LED0 pin: PF9 */
-#define LED0_PIN    GET_PIN(F, 9)
 
 int main(void)
 {
-    /* 挂载 elm 文件系统到 / 目录 */
-    if (dfs_mount(FS_PARTITION_NAME, "/", "elm", 0, 0) == 0) 
+    /* 挂载 elm 文件系统到 / 目录，如果你所使用的开发板没有文件系统也可以跳过这一步 */
+    if (dfs_mount(FS_PARTITION_NAME, "/", "elm", 0, 0) == 0)
     {
         rt_kprintf("Filesystem initialized!");
     }
     else
     {
-        rt_kprintf("Filesystem initialization failed!");
+        /* 如果挂载失败，则尝试在文件系统分区重新创建文件系统 */
+        dfs_mkfs("elm", FS_PARTITION_NAME);
+        /* 尝试重新挂载文件系统 */
+        if (dfs_mount(FS_PARTITION_NAME, "/", "elm", 0, 0) == 0)
+        {
+            /* 仍然挂载文件系统失败，请自行检查失败原因 */
+            rt_kprintf("Failed to initialize filesystem!");
+        }
     }
 
     rt_thread_mdelay(100);
 
-    /* 运行 MicroPython 启动函数 */
-    extern void mpy_main(const char *filename);
-    mpy_main(NULL);
+    while(1)
+    {
+        /* 在这里让程序进入循环，通过这种方式实现 MicroPython 的软复位*/
+        extern void mpy_main(const char *filename);
+         /* 启动 MicroPython */
+        mpy_main(NULL);
+    }
 
-    rt_kprintf("You can enter repl mode by typing python commands.");
-
-    /* 如果想要在 REPL 环境按下 CTRL+D 重启系统可以加上下面这一句 */
-    /* rt_hw_cpu_reset(); */    
+    return RT_EOK;
 }
 ```
 
-重新编译工程下载到板卡中，就会在 main 线程中自动进入 MicroPython 的交互环境 REPL。此时如果先前没有在存储器上创建相应的文件系统，可能会导致文件系统挂载失败。此时可以使用如下两种方法在存储设备上创建文件系统：
+重新编译工程并下载程序到板卡中，就会在 main 线程中自动启动 MicroPython，接下来就可以使用 [**RT-Thread MicroPython 开发环境**](https://marketplace.visualstudio.com/items?itemName=RT-Thread.rt-thread-micropython) 来进行应用开发了。 通过开发环境连接到开发板，即可看到 MicroPython 的交互环境 REPL，如下图所示：
 
-- 按下 `CTRL + D` 进入 msh 使用 `mkfs -t elm W25Q128` 命令创建文件系统
-- 在 REPL 交互环境中输入 `import os`，`os.mkfs("elm", "W25Q128")` 命令来创建文件系统
-
-注意： **W25Q128** 是本次示例中将要创建文件系统的块设备名称，并不是固定填写该名称。因此在使用上述命令创建文件系统前，需要确定当前系统中块设备的实际名称。
-
-成功创建文件系统后，就可以使用 [ **MicroPython 开发环境**](https://marketplace.visualstudio.com/items?itemName=RT-Thread.rt-thread-micropython) 来进行应用开发了。
+![en_connect_board](assets/en_connect_board.gif)
 

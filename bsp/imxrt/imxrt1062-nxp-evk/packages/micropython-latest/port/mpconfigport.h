@@ -65,7 +65,7 @@
 #define MICROPY_KBD_EXCEPTION       (1)
 #define MICROPY_HELPER_REPL         (1)
 #define MICROPY_HELPER_LEXER_UNIX   (0)
-#define MICROPY_ENABLE_SOURCE_LINE  (0)
+#define MICROPY_ENABLE_SOURCE_LINE  (1)
 #define MICROPY_ENABLE_DOC_STRING   (0)
 #define MICROPY_ENABLE_SCHEDULER    (1)
 #define MICROPY_ERROR_REPORTING     (MICROPY_ERROR_REPORTING_TERSE)
@@ -112,6 +112,7 @@
 #define MICROPY_PY_STRUCT           (1)
 #define MICROPY_PY_SYS              (1)
 #define MICROPY_MODULE_FROZEN_MPY   (1)
+#define MICROPY_MODULE_FROZEN_STR   (0)
 #define MICROPY_CPYTHON_COMPAT      (1)
 #define MICROPY_LONGINT_IMPL        (MICROPY_LONGINT_IMPL_MPZ)
 #define MICROPY_FLOAT_IMPL          (MICROPY_FLOAT_IMPL_DOUBLE)
@@ -153,7 +154,7 @@
 #endif
 
 #ifdef MICROPYTHON_USING_MACHINE_LCD
-#define MICROPY_PY_MACHINE_LCD       (0)
+#define MICROPY_PY_MACHINE_LCD       (1)
 #endif
 
 #ifdef MICROPYTHON_USING_MACHINE_RTC
@@ -280,7 +281,7 @@
     } while (0);
 #endif
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM)|| defined (__ARMCC_VERSION) 
 #include <sys/types.h>
 #define MICROPY_NO_ALLOCA           1
 #define MP_WEAK                     RT_WEAK

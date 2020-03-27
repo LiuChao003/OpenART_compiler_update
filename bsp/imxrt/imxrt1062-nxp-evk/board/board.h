@@ -15,7 +15,8 @@
 #include "fsl_common.h"
 #include "clock_config.h"
 
-#ifdef __CC_ARM
+//#ifdef __CC_ARM
+#ifdef __ARMCC_VERSION
 extern int Image$$RTT_HEAP$$ZI$$Base;
 extern int Image$$RTT_HEAP$$ZI$$Limit;
 #define HEAP_BEGIN          (&Image$$RTT_HEAP$$ZI$$Base)

@@ -34,7 +34,8 @@
 
 #include <stdarg.h>
 #include "machine_uart.h"
-
+   
+#include "drv_uart.h"
 #ifdef MICROPYTHON_USING_MACHINE_UART
 
 #ifndef RT_USING_SERIAL
@@ -166,6 +167,16 @@ STATIC mp_obj_t machine_uart_deinit(mp_obj_t self_in) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_uart_deinit_obj, machine_uart_deinit);
 
+STATIC mp_obj_t machine_uart_any(mp_obj_t self_in) {
+    machine_uart_obj_t *self = MP_OBJ_TO_PTR(self_in);
+
+    struct serial_configure config;
+    rt_err_t len;
+    len = rt_device_control((struct rt_device *)(self->uart_device), RT_DEVICE_UART_ANY, &config);
+
+    return MP_OBJ_NEW_SMALL_INT((size_t)len);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_uart_any_obj, machine_uart_any);
 #define RETRY_TIMES 500
 
 STATIC mp_obj_t machine_uart_writechar(mp_obj_t self_in, mp_obj_t char_in) {
@@ -201,12 +212,22 @@ STATIC mp_obj_t machine_uart_readchar(mp_obj_t self_in) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_uart_readchar_obj, machine_uart_readchar);
 
+STATIC mp_obj_t pyb_uart_sendbreak(mp_obj_t self_in) {
+      machine_uart_obj_t *self = self_in;
+      struct serial_configure config;
+
+      rt_device_control((struct rt_device *)(self->uart_device), RT_DEVICE_UART_SBK, &config);   
+      return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(pyb_uart_sendbreak_obj, pyb_uart_sendbreak);
+
+
 STATIC const mp_rom_map_elem_t machine_uart_locals_dict_table[] = {
     // instance methods
 
     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&machine_uart_init_obj) },
     { MP_ROM_QSTR(MP_QSTR_deinit), MP_ROM_PTR(&machine_uart_deinit_obj) },
-//    { MP_ROM_QSTR(MP_QSTR_any), MP_ROM_PTR(&machine_uart_any_obj) },
+    { MP_ROM_QSTR(MP_QSTR_any), MP_ROM_PTR(&machine_uart_any_obj) },
 
     /// \method read([nbytes])
     { MP_ROM_QSTR(MP_QSTR_read), MP_ROM_PTR(&mp_stream_read_obj) },
@@ -219,7 +240,7 @@ STATIC const mp_rom_map_elem_t machine_uart_locals_dict_table[] = {
 
     { MP_ROM_QSTR(MP_QSTR_writechar), MP_ROM_PTR(&machine_uart_writechar_obj) },
     { MP_ROM_QSTR(MP_QSTR_readchar), MP_ROM_PTR(&machine_uart_readchar_obj) },
-//    { MP_ROM_QSTR(MP_QSTR_sendbreak), MP_ROM_PTR(&pyb_uart_sendbreak_obj) },
+    { MP_ROM_QSTR(MP_QSTR_sendbreak), MP_ROM_PTR(&pyb_uart_sendbreak_obj) },
 
 //    class constants
 //    { MP_ROM_QSTR(MP_QSTR_RTS), MP_ROM_INT(UART_HWCONTROL_RTS) },

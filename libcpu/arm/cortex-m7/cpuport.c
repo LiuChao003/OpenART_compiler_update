@@ -19,10 +19,10 @@
 
 #include <rtthread.h>
 
-#if               /* ARMCC */ (  (defined ( __CC_ARM ) && defined ( __TARGET_FPU_VFP ))    \
-                  /* Clang */ || (defined ( __CLANG_ARM ) && defined ( __VFP_FP__ ) && !defined(__SOFTFP__)) \
-                  /* IAR */   || (defined ( __ICCARM__ ) && defined ( __ARMVFP__ ))        \
-                  /* GNU */   || (defined ( __GNUC__ ) && defined ( __VFP_FP__ ) && !defined(__SOFTFP__)) )
+#if /* ARMCC */ (  (defined ( __CC_ARM ) && defined ( __TARGET_FPU_VFP )) \
+     /* ARMCLANG */ || (defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050) && defined (__ARM_PCS_VFP)) \
+     /* IAR */   || (defined ( __ICCARM__ ) && defined ( __ARMVFP__ )) \
+     /* GNU */   || (defined ( __GNUC__ ) && defined ( __VFP_FP__ ) && !defined(__SOFTFP__)) )
 #define USE_FPU   1
 #else
 #define USE_FPU   0
@@ -467,6 +467,15 @@ __asm int __rt_ffs(int value)
 exit
     BX      lr
 }
+
+#elif defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+int __rt_ffs(int value)
+{
+    return value == 0 ? value :
+        __builtin_clz(__builtin_arm_rbit(value)) + 1;   
+}
+
+
 #elif defined(__CLANG_ARM)
 int __rt_ffs(int value)
 {

@@ -53,24 +53,48 @@ STATIC void machine_hard_i2c_print(const mp_print_t *print, mp_obj_t self_in, mp
     return;
 }
 
-int machine_hard_i2c_readfrom(mp_obj_base_t *self_in, uint16_t addr, uint8_t *dest, size_t len, bool stop) {
-    machine_hard_i2c_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    return rt_i2c_master_recv(self->i2c_bus, addr, 0, dest, len);
-}
-
-int machine_hard_i2c_writeto(mp_obj_base_t *self_in, uint16_t addr, const uint8_t *src, size_t len, bool stop) {
+int machine_hard_i2c_transfer(mp_obj_base_t* self_in, uint16_t addr, size_t n, mp_machine_i2c_buf_t* bufs, unsigned int flags)
+{
+    machine_hard_i2c_obj_t* self = MP_OBJ_TO_PTR(self_in);
+    int count;
+    int num_acks = 0;
     uint8_t buf[1] = {0};
-    machine_hard_i2c_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    if (len == 0){
-        len = 1;
-        if (src == NULL){
-            src = buf;
+
+    for(; n--; ++bufs)
+    {
+        size_t len = bufs->len;
+        if(flags & MP_MACHINE_I2C_FLAG_READ)
+        {
+            return rt_i2c_master_recv(self->i2c_bus, addr, 1, bufs->buf, bufs->len);
         }
-        return !rt_i2c_master_send(self->i2c_bus, addr, 0, src, len);
-    } else if (src == NULL){
-        nlr_raise(mp_obj_new_exception_msg_varg(&mp_type_ValueError, "buf must not NULL"));
+        else
+        {
+            if(bufs->len == 0)
+            {
+                len = 1;
+                if(bufs->buf == NULL)
+                {
+                    bufs->buf = buf;                                                                                         ;
+                }
+                return !rt_i2c_master_send(self->i2c_bus, addr, 0, bufs->buf, len);
+            }
+            else if(bufs->buf == NULL)
+            {
+                nlr_raise(mp_obj_new_exception_msg_varg(&mp_type_ValueError, "buf must not NULL"));
+            }
+           else	
+		    {
+				count = rt_i2c_master_send(self->i2c_bus, addr, 0, bufs->buf, bufs->len );
+                if(count < 0)
+                {
+                    return count;
+                }
+                num_acks += count;
+            }
+		}
+
     }
-    return rt_i2c_master_send(self->i2c_bus, addr, 0, src, len);
+    return num_acks;
 }
 
 /******************************************************************************/
@@ -99,8 +123,9 @@ STATIC const mp_machine_i2c_p_t machine_hard_i2c_p = {
     .stop = NULL,
     .read = NULL,
     .write = NULL,
-    .readfrom = machine_hard_i2c_readfrom,
-    .writeto = machine_hard_i2c_writeto,
+    // .readfrom = machine_hard_i2c_readfrom,
+    // .writeto = machine_hard_i2c_writeto,
+	.transfer = machine_hard_i2c_transfer,
 };
 
 STATIC const mp_obj_type_t machine_hard_i2c_type = {
