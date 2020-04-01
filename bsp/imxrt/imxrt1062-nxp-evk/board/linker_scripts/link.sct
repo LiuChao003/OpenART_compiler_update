@@ -1,4 +1,4 @@
-#!armclang -E --target=arm-arm-none-eabi -mcpu=cortex-m7 -xc
+#! armcc -E
 /*
 ** ###################################################################
 **     Processors:          MIMXRT1062CVJ5A

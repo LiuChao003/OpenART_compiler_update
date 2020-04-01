@@ -326,6 +326,20 @@
 #define BSP_USING_GPIO
 #define BSP_USING_LPUART
 #define BSP_USING_LPUART1
+#define BSP_USING_PWM
+#define BSP_USING_PWM1
+#define BSP_USING_PWM1_CH3
+#define BSP_USING_PWM4
+#define BSP_USING_PWM4_CH0
+#define BSP_USING_PWM4_CH1
+#define BSP_USING_SPI
+#define BSP_USING_SPI1
+#define BSP_USING_I2C
+#define BSP_USING_I2C1
+#define HW_I2C1_BADURATE_100kHZ
+#define BSP_USING_RTC
+#define BSP_USING_ADC
+#define BSP_USING_ADC1
 
 /* Onboard Peripheral Drivers */
 

@@ -667,7 +667,7 @@ struct rt_serial_rx_fifo* rx_fifo;
         break;
 #endif
     case RT_DEVICE_UART_ANY:
-        
+
         rx_fifo = (struct rt_serial_rx_fifo*) serial->serial_rx;
         RT_ASSERT(rx_fifo != RT_NULL);
         {
