@@ -281,7 +281,7 @@
     } while (0);
 #endif
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM)||defined(__ARMCC_VERSION)
 #include <sys/types.h>
 #define MICROPY_NO_ALLOCA           1
 #define MP_WEAK                     RT_WEAK
