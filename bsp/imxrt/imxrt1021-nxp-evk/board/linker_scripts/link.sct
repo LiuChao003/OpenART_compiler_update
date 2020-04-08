@@ -74,8 +74,8 @@
 #endif
 
 #include "../../rtconfig.h"
-;BSP_USING_HYPERFLASH
-#if (defined(BOARD_USING_QSPIFLASH))
+;BSP_USING_QSPIFLASH
+#if (defined(BSP_USING_HYPERFLASH))
 LR_m_rom_config m_flash_config_start m_flash_config_size      ; load region size_region
 {   
     RW_m_config_text m_flash_config_start m_flash_config_size ; load address = execution address

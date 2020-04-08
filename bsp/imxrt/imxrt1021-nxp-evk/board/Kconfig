@@ -3,6 +3,8 @@ menu "Hardware Drivers Config"
 config SOC_IMXRT1021DAG5A
     bool 
     select SOC_MIMXRT1020_SERIES
+	select RT_USING_COMPONENTS_INIT
+    select RT_USING_USER_MAIN
     default y
 
 menu "On-chip Peripheral Drivers"
@@ -102,14 +104,28 @@ menu "On-chip Peripheral Drivers"
                 endif
         endif
 
+	menuconfig BSP_USING_SPI
+			bool "Enable SPI"
+			default n
+			select RT_USING_SPI
+			if BSP_USING_SPI
+				menuconfig BSP_USING_SPI1
+					bool "Enable SPI1"
+					default n
+					if BSP_USING_SPI1
+						config BSP_SPI1_USING_DMA
+							 bool "Enable SPI1 DMA"
+							 default n
+					endif		 
+			endif
     menuconfig BSP_USING_I2C
         bool "Enable I2C"
         select RT_USING_I2C
-        default n
+        default y
         if BSP_USING_I2C
             config BSP_USING_I2C1
                 bool "Enable I2C1"
-                default n
+                default y
             choice
                 prompt "Select I2C1 badurate"
                 default HW_I2C1_BADURATE_100kHZ

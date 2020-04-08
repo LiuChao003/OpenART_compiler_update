@@ -12,6 +12,10 @@
 #include <rtthread.h>
 #include "board.h"
 #include "pin_mux.h"
+#include "fsl_common.h"
+#include "fsl_iomuxc.h"
+#include "fsl_iomuxc.h"
+#include "fsl_gpio.h"
 
 #ifdef BSP_USING_DMA
 #include "fsl_dmamux.h"
@@ -168,6 +172,110 @@ void imxrt_dma_init(void)
     EDMA_Init(DMA0, &config);
 }
 #endif
+
+
+#ifdef BSP_USING_LPUART
+void imxrt_uart_pins_init(void)
+{
+#ifdef BSP_USING_LPUART1
+  CLOCK_EnableClock(kCLOCK_Iomuxc);           /* iomuxc clock (iomuxc_clk_enable): 0x03U */
+
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_B0_06_LPUART1_TX,        /* GPIO_AD_B0_06 is configured as LPUART1_TX */
+      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_B0_07_LPUART1_RX,        /* GPIO_AD_B0_07 is configured as LPUART1_RX */
+      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_AD_B0_06_LPUART1_TX,        /* GPIO_AD_B0_06 PAD functional properties : */
+      0x10B0U);                               /* Slew Rate Field: Slow Slew Rate
+                                                 Drive Strength Field: R0/6
+                                                 Speed Field: medium(100MHz)
+                                                 Open Drain Enable Field: Open Drain Disabled
+                                                 Pull / Keep Enable Field: Pull/Keeper Enabled
+                                                 Pull / Keep Select Field: Keeper
+                                                 Pull Up / Down Config. Field: 100K Ohm Pull Down
+                                                 Hyst. Enable Field: Hysteresis Disabled */
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_AD_B0_07_LPUART1_RX,        /* GPIO_AD_B0_07 PAD functional properties : */
+      0x10B0U);                               /* Slew Rate Field: Slow Slew Rate
+                                                 Drive Strength Field: R0/6
+                                                 Speed Field: medium(100MHz)
+                                                 Open Drain Enable Field: Open Drain Disabled
+                                                 Pull / Keep Enable Field: Pull/Keeper Enabled
+                                                 Pull / Keep Select Field: Keeper
+                                                 Pull Up / Down Config. Field: 100K Ohm Pull Down
+                                                 Hyst. Enable Field: Hysteresis Disabled */
+#endif
+
+
+#ifdef BSP_USING_I2C1
+  CLOCK_EnableClock(kCLOCK_Iomuxc);           /* iomuxc clock (iomuxc_clk_enable): 0x03U */
+
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_B1_14_LPI2C1_SCL,        /* GPIO_AD_B1_14 is configured as LPI2C1_SCL */
+      1U);                                    /* Software Input On Field: Force input path of pad GPIO_AD_B1_14 */
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_B1_15_LPI2C1_SDA,        /* GPIO_AD_B1_15 is configured as LPI2C1_SDA */
+      1U);                                    /* Software Input On Field: Force input path of pad GPIO_AD_B1_15 */
+	  
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_AD_B1_14_LPI2C1_SCL,        /* GPIO_AD_B1_14 PAD functional properties : */
+      0xD8B0u);                               /* Slew Rate Field: Slow Slew Rate
+                                                 Drive Strength Field: R0/6
+                                                 Speed Field: medium(100MHz)
+                                                 Open Drain Enable Field: Open Drain Enabled
+                                                 Pull / Keep Enable Field: Pull/Keeper Enabled
+                                                 Pull / Keep Select Field: Keeper
+                                                 Pull Up / Down Config. Field: 22K Ohm Pull Up
+                                                 Hyst. Enable Field: Hysteresis Disabled */
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_AD_B1_15_LPI2C1_SDA,        /* GPIO_AD_B1_15 PAD functional properties : */
+      0xD8B0u);                               /* Slew Rate Field: Slow Slew Rate
+                                                 Drive Strength Field: R0/6
+                                                 Speed Field: medium(100MHz)
+                                                 Open Drain Enable Field: Open Drain Enabled
+                                                 Pull / Keep Enable Field: Pull/Keeper Enabled
+                                                 Pull / Keep Select Field: Keeper
+                                                 Pull Up / Down Config. Field: 22K Ohm Pull Up
+                                                 Hyst. Enable Field: Hysteresis Disabled */	  
+#endif	
+
+#ifdef BSP_USING_I2C4
+  CLOCK_EnableClock(kCLOCK_Iomuxc);           /* iomuxc clock (iomuxc_clk_enable): 0x03U */
+
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_SD_B1_02_LPI2C4_SCL,        /* GPIO_AD_B1_14 is configured as LPI2C1_SCL */
+      1U);                                    /* Software Input On Field: Force input path of pad GPIO_AD_B1_14 */
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_SD_B1_03_LPI2C4_SDA,        /* GPIO_AD_B1_15 is configured as LPI2C1_SDA */
+      1U);                                    /* Software Input On Field: Force input path of pad GPIO_AD_B1_15 */
+	  
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_SD_B1_02_LPI2C4_SCL,        /* GPIO_AD_B1_14 PAD functional properties : */
+      0xD8B0u);                               /* Slew Rate Field: Slow Slew Rate
+                                                 Drive Strength Field: R0/6
+                                                 Speed Field: medium(100MHz)
+                                                 Open Drain Enable Field: Open Drain Enabled
+                                                 Pull / Keep Enable Field: Pull/Keeper Enabled
+                                                 Pull / Keep Select Field: Keeper
+                                                 Pull Up / Down Config. Field: 22K Ohm Pull Up
+                                                 Hyst. Enable Field: Hysteresis Disabled */
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_SD_B1_03_LPI2C4_SDA,        /* GPIO_AD_B1_15 PAD functional properties : */
+      0xD8B0u);                               /* Slew Rate Field: Slow Slew Rate
+                                                 Drive Strength Field: R0/6
+                                                 Speed Field: medium(100MHz)
+                                                 Open Drain Enable Field: Open Drain Enabled
+                                                 Pull / Keep Enable Field: Pull/Keeper Enabled
+                                                 Pull / Keep Select Field: Keeper
+                                                 Pull Up / Down Config. Field: 22K Ohm Pull Up
+                                                 Hyst. Enable Field: Hysteresis Disabled */	  
+#endif					
+
+
+}													 
+#endif
 /**
  * This function will initial rt1050 board.
  */
@@ -179,6 +287,16 @@ void rt_hw_board_init()
 
     NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
     SysTick_Config(SystemCoreClock / RT_TICK_PER_SECOND);
+	
+	
+	
+#ifdef BSP_USING_LPUART
+    imxrt_uart_pins_init();
+#endif
+
+#ifdef BSP_USING_ETH
+    imxrt_enet_pins_init();
+#endif	
 
 #ifdef BSP_USING_DMA
     imxrt_dma_init();

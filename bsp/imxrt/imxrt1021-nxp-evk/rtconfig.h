@@ -14,10 +14,12 @@
 #define RT_USING_OVERFLOW_CHECK
 #define RT_USING_HOOK
 #define RT_USING_IDLE_HOOK
-#define RT_IDEL_HOOK_LIST_SIZE 4
+#define RT_IDLE_HOOK_LIST_SIZE 4
 #define IDLE_THREAD_STACK_SIZE 256
+#define RT_USING_TIMER_SOFT
+#define RT_TIMER_THREAD_PRIO 4
+#define RT_TIMER_THREAD_STACK_SIZE 512
 #define RT_DEBUG
-#define RT_DEBUG_COLOR
 
 /* Inter-Thread communication */
 
@@ -30,8 +32,7 @@
 /* Memory Management */
 
 #define RT_USING_MEMPOOL
-#define RT_USING_MEMHEAP
-#define RT_USING_MEMHEAP_AS_HEAP
+#define RT_USING_SMALL_MEM
 #define RT_USING_HEAP
 
 /* Kernel Device Object */
@@ -39,14 +40,14 @@
 #define RT_USING_DEVICE
 #define RT_USING_CONSOLE
 #define RT_CONSOLEBUF_SIZE 128
-#define RT_CONSOLE_DEVICE_NAME "uart1"
+#define RT_CONSOLE_DEVICE_NAME "uart"
 #define RT_VER_NUM 0x40002
 
 /* RT-Thread Components */
 
 #define RT_USING_COMPONENTS_INIT
 #define RT_USING_USER_MAIN
-#define RT_MAIN_THREAD_STACK_SIZE 2048
+#define RT_MAIN_THREAD_STACK_SIZE 8192
 #define RT_MAIN_THREAD_PRIORITY 10
 
 /* C++ features */
@@ -61,11 +62,10 @@
 #define FINSH_USING_SYMTAB
 #define FINSH_USING_DESCRIPTION
 #define FINSH_THREAD_PRIORITY 20
-#define FINSH_THREAD_STACK_SIZE 4096
+#define FINSH_THREAD_STACK_SIZE 8192
 #define FINSH_CMD_SIZE 80
 #define FINSH_USING_MSH
 #define FINSH_USING_MSH_DEFAULT
-#define FINSH_USING_MSH_ONLY
 #define FINSH_ARG_MAX 10
 
 /* Device virtual file system */
@@ -78,10 +78,12 @@
 #define RT_USING_SERIAL
 #define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
-#define RT_USING_CPUTIME
 #define RT_USING_I2C
 #define RT_USING_I2C_BITOPS
 #define RT_USING_PIN
+#define RT_USING_PWM
+#define RT_USING_RTC
+#define RT_USING_SPI
 
 /* Using USB */
 
@@ -131,6 +133,22 @@
 
 /* language packages */
 
+#define PKG_USING_MICROPYTHON
+
+/* Hardware Module */
+
+
+/* System Module */
+
+
+/* Tools Module */
+
+
+/* Network Module */
+
+#define PKG_MICROPYTHON_HEAP_SIZE 20480
+#define PKG_USING_MICROPYTHON_LATEST_VERSION
+#define PKG_MICROPYTHON_VER_NUM 0x99999
 
 /* multimedia packages */
 
@@ -153,16 +171,25 @@
 /* Hardware Drivers Config */
 
 #define SOC_IMXRT1021DAG5A
-
-/* On-chip Peripheral Drivers */
 #define BSP_USING_QSPIFLASH
+/* On-chip Peripheral Drivers */
 
 #define BSP_USING_GPIO
 #define BSP_USING_LPUART
 #define BSP_USING_LPUART1
+#define BSP_USING_PWM
+#define BSP_USING_PWM1
+#define BSP_USING_PWM1_CH3
+#define BSP_USING_PWM4
+#define BSP_USING_PWM4_CH0
+#define BSP_USING_PWM4_CH1
+#define BSP_USING_SPI
+#define BSP_USING_SPI1
+#define BSP_SPI1_USING_DMA
 #define BSP_USING_I2C
 #define BSP_USING_I2C1
 #define HW_I2C1_BADURATE_100kHZ
+#define BSP_USING_RTC
 
 /* Onboard Peripheral Drivers */
 
