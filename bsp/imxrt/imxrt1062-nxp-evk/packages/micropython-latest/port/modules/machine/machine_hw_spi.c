@@ -64,6 +64,12 @@ mp_obj_t machine_hard_spi_make_new(const mp_obj_type_t *type, size_t n_args, siz
     machine_hard_spi_obj_t *self = m_new_obj(machine_hard_spi_obj_t);
     self->base.type = &machine_hard_spi_type;
     self->spi_device = rt_spi_device;
+	struct rt_spi_configuration cfg;
+    cfg.data_width = 8;
+    cfg.mode = RT_SPI_MASTER | RT_SPI_MODE_0 | RT_SPI_MSB;
+    cfg.max_hz = 500000;
+//	cfg.max_hz = 200000;
+    rt_spi_configure(rt_spi_device, &cfg); 
     return (mp_obj_t) self;
 }
 
@@ -117,11 +123,20 @@ STATIC void machine_hard_spi_init(mp_obj_base_t *self_in, size_t n_args, const m
 STATIC void machine_hard_spi_transfer(mp_obj_base_t *self_in, size_t len, const uint8_t *src, uint8_t *dest) {
     machine_hard_spi_obj_t *self = (machine_hard_spi_obj_t*)self_in;
 
-    if (src && dest) {
+//    if (src && dest) {
+//        rt_spi_send_then_recv(self->spi_device, src, len, dest, len);
+//    } else if (src) {
+//        rt_spi_send(self->spi_device, src, len);
+//    } else {
+//        rt_spi_recv(self->spi_device, dest, len);
+//    }
+	if (src && dest) {
         rt_spi_send_then_recv(self->spi_device, src, len, dest, len);
-    } else if (src) {
+    }  
+	if (src) {
         rt_spi_send(self->spi_device, src, len);
-    } else {
+    } 
+	if(dest){
         rt_spi_recv(self->spi_device, dest, len);
     }
 }

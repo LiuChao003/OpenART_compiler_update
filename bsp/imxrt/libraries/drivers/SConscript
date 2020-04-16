@@ -61,6 +61,6 @@ if GetDepend('RT_USING_USB_DEVICE'):
 	
 path =  [cwd,cwd + '/config']
 
-group = DefineGroup('Drivers', src, depend = [''], CPPPATH = path, CPPDEFINES=CPPDEFINES)
+group = DefineGroup('Drivers', src, depend = [''], CPPPATH = path)
 
 Return('group')

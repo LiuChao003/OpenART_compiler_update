@@ -252,7 +252,7 @@ void LPSPI_MasterGetDefaultConfig(lpspi_master_config_t *masterConfig)
     /* Initializes the configure structure to zero. */
     memset(masterConfig, 0, sizeof(*masterConfig));
 
-    masterConfig->baudRate     = 500000;
+    masterConfig->baudRate     = 50000;
     masterConfig->bitsPerFrame = 8;
     masterConfig->cpol         = kLPSPI_ClockPolarityActiveHigh;
     masterConfig->cpha         = kLPSPI_ClockPhaseFirstEdge;
@@ -810,8 +810,8 @@ status_t LPSPI_MasterTransferBlocking(LPSPI_Type *base, lpspi_transfer_t *transf
     /*The TX and RX FIFO sizes are always the same*/
     uint32_t fifoSize = LPSPI_GetRxFifoSize(base);
 
-    uint32_t whichPcs = (transfer->configFlags & LPSPI_MASTER_PCS_MASK) >> LPSPI_MASTER_PCS_SHIFT;
-
+//    uint32_t whichPcs = (transfer->configFlags & LPSPI_MASTER_PCS_MASK) >> LPSPI_MASTER_PCS_SHIFT;
+	uint32_t whichPcs = kLPSPI_Pcs0;
     bool isPcsContinuous = (bool)(transfer->configFlags & kLPSPI_MasterPcsContinuous);
     bool isRxMask        = false;
     bool isByteSwap      = (bool)(transfer->configFlags & kLPSPI_MasterByteSwap);

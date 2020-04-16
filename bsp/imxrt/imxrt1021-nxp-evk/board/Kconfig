@@ -7,6 +7,17 @@ config SOC_IMXRT1021DAG5A
     select RT_USING_USER_MAIN
     default y
 
+
+menu "Onboard Peripheral Drivers"
+
+    config BSP_USING_POT
+        bool "Enable potentiometer"
+        select BSP_USING_ADC
+        select BSP_USING_ADC1
+        default n 
+
+endmenu
+
 menu "On-chip Peripheral Drivers"
 
 	config BSP_USING_DMA
@@ -142,6 +153,16 @@ menu "On-chip Peripheral Drivers"
         bool "Enable RTC"
         select RT_USING_RTC
         default n
+		
+    menuconfig BSP_USING_ADC
+        bool "Enable ADC"
+        default n
+        select RT_USING_ADC
+        if BSP_USING_ADC
+            config BSP_USING_ADC1
+                bool "Enable ADC1"
+                default n
+        endif
 
 endmenu
 

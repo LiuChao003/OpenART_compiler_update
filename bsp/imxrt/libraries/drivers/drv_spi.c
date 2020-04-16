@@ -17,6 +17,7 @@
 #include "fsl_lpspi.h"
 #include "fsl_lpspi_edma.h"
 #include "fsl_dmamux.h"
+#include "drv_gpio.h"
 
 #define LOG_TAG             "drv.spi"
 #include <drv_log.h>
@@ -24,7 +25,11 @@
 #if defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL
 #error "Please don't define 'FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL'!"
 #endif
+#define SPI1_CS               GET_PIN(3,13)
+#define EXAMPLE_LPSPI_CLOCK_SOURCE_SELECT (1U)
+#define EXAMPLE_LPSPI_CLOCK_SOURCE_DIVIDER (7U)
 
+#define LPSPI_MASTER_CLK_FREQ (CLOCK_GetFreq(kCLOCK_Usb1PllPfd0Clk) / (EXAMPLE_LPSPI_CLOCK_SOURCE_DIVIDER + 1U))
 enum
 {
 #ifdef BSP_USING_SPI1
@@ -115,9 +120,9 @@ static void spi_get_dma_config(void)
 #if (defined(BSP_SPI_USING_DMA) & defined(BSP_USING_SPI1))
     static struct dma_config spi1_dma =
     {
-        .rx_request = kDmaRequestMuxLPSPI1Rx,
+        .rx_request = kDmaRequestMuxspi->baseRx,
         .rx_channel = BSP_SPI1_RX_DMA_CHANNEL,
-        .tx_request = kDmaRequestMuxLPSPI1Tx,
+        .tx_request = kDmaRequestMuxspi->baseTx,
         .tx_channel = BSP_SPI1_TX_DMA_CHANNEL,
     };
 
@@ -245,10 +250,19 @@ static rt_err_t spi_configure(struct rt_spi_device* device, struct rt_spi_config
 {
     lpspi_master_config_t masterConfig;
     struct imxrt_spi* spi = RT_NULL;
+    rt_uint32_t srcClock_Hz;
+    rt_uint8_t g_masterRxWatermark;
+    rt_uint8_t g_masterFifoSize;
+    rt_uint32_t whichPcs;
+    rt_uint8_t txWatermark;
+    rt_bool_t isMasterTransferCompleted = RT_FALSE;
+    volatile uint32_t masterTxCount;
+    volatile uint32_t masterRxCount;
 
     RT_ASSERT(cfg != RT_NULL);
     RT_ASSERT(device != RT_NULL);
-
+    CLOCK_SetMux(kCLOCK_LpspiMux, EXAMPLE_LPSPI_CLOCK_SOURCE_SELECT);
+    CLOCK_SetDiv(kCLOCK_LpspiDiv, EXAMPLE_LPSPI_CLOCK_SOURCE_DIVIDER);
     spi = (struct imxrt_spi*)(device->bus->parent.user_data);
     RT_ASSERT(spi != RT_NULL);
 
@@ -292,9 +306,10 @@ static rt_err_t spi_configure(struct rt_spi_device* device, struct rt_spi_config
     {
         masterConfig.cpol = kLPSPI_ClockPolarityActiveHigh;
     }
-
+    masterConfig.whichPcs = kLPSPI_Pcs0;
+    masterConfig.pcsActiveHighOrLow = kLPSPI_PcsActiveLow;
     masterConfig.pinCfg                        = kLPSPI_SdiInSdoOut;
-    masterConfig.dataOutConfig                 = kLpspiDataOutTristate;
+    masterConfig.dataOutConfig                 = kLpspiDataOutRetained;
     masterConfig.pcsToSckDelayInNanoSec        = 1000000000 / masterConfig.baudRate;
     masterConfig.lastSckToPcsDelayInNanoSec    = 1000000000 / masterConfig.baudRate;
     masterConfig.betweenTransferDelayInNanoSec = 1000000000 / masterConfig.baudRate;
@@ -302,9 +317,42 @@ static rt_err_t spi_configure(struct rt_spi_device* device, struct rt_spi_config
     LPSPI_MasterInit(spi->base, &masterConfig, imxrt_get_lpspi_freq());
     spi->base->CFGR1 |= LPSPI_CFGR1_PCSCFG_MASK;
 
+    isMasterTransferCompleted = false;
+    masterTxCount             = 0;
+    masterRxCount             = 0;
+    whichPcs                  = kLPSPI_Pcs0;
+
+    /*The TX and RX FIFO sizes are always the same*/
+    g_masterFifoSize = LPSPI_GetRxFifoSize(spi->base);
+
+    /*Set the RX and TX watermarks to reduce the ISR times.*/
+    if(g_masterFifoSize > 1)
+    {
+        txWatermark         = 1;
+        g_masterRxWatermark = g_masterFifoSize - 2;
+    }
+    else
+    {
+        txWatermark         = 0;
+        g_masterRxWatermark = 0;
+    }
+
+    LPSPI_SetFifoWatermarks(spi->base, txWatermark, g_masterRxWatermark);
+    spi->base->CFGR1 &= (~LPSPI_CFGR1_NOSTALL_MASK);
+
+    /*Flush FIFO , clear status , disable all the inerrupts.*/
+    LPSPI_FlushFifo(spi->base, true, true);
+    LPSPI_ClearStatusFlags(spi->base, kLPSPI_AllStatusFlag);
+    LPSPI_DisableInterrupts(spi->base, kLPSPI_AllInterruptEnable);
+
+    spi->base->TCR =
+        (spi->base->TCR &
+         ~(LPSPI_TCR_CONT_MASK | LPSPI_TCR_CONTC_MASK | LPSPI_TCR_RXMSK_MASK | LPSPI_TCR_PCS_MASK)) |
+        LPSPI_TCR_CONT(0) | LPSPI_TCR_CONTC(0) | LPSPI_TCR_RXMSK(0) | LPSPI_TCR_TXMSK(0) | LPSPI_TCR_PCS(whichPcs);
+
+
     return RT_EOK;
 }
-
 static rt_uint32_t spixfer(struct rt_spi_device* device, struct rt_spi_message* message)
 {
     lpspi_transfer_t transfer;
@@ -362,7 +410,7 @@ int rt_hw_spi_bus_init(void)
         lpspis[i].spi_bus.parent.user_data = &lpspis[i];
 
         ret = rt_spi_bus_register(&lpspis[i].spi_bus, lpspis[i].bus_name, &imxrt_spi_ops);
-        error = rt_hw_spi_device_attach(lpspis[i].bus_name, lpspis[i].device_name, lpspis[i].cs_pin);
+        error = rt_hw_spi_device_attach(lpspis[i].bus_name, lpspis[i].device_name, SPI1_CS);
         if(error != RT_EOK)
         {
             LOG_E("%s has no external slave", lpspis[i].bus_name);
@@ -371,7 +419,6 @@ int rt_hw_spi_bus_init(void)
         lpspi_dma_config(&lpspis[i]);
 #endif
     }
-
     return ret;
 }
 INIT_BOARD_EXPORT(rt_hw_spi_bus_init);

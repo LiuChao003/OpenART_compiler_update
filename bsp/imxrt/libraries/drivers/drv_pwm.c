@@ -374,7 +374,7 @@ int rt_hw_pwm_init(void)
 
 #endif /* BSP_USING_PWM3 */
 
-#ifdef BSP_USING_PWM4
+#ifdef BSP_USING_PWM4_
 
     static struct rt_device_pwm pwm4_device;
 

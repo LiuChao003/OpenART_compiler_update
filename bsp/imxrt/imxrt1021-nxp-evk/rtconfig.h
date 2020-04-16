@@ -40,7 +40,7 @@
 #define RT_USING_DEVICE
 #define RT_USING_CONSOLE
 #define RT_CONSOLEBUF_SIZE 128
-#define RT_CONSOLE_DEVICE_NAME "uart"
+#define RT_CONSOLE_DEVICE_NAME "uart1"
 #define RT_VER_NUM 0x40002
 
 /* RT-Thread Components */
@@ -81,6 +81,7 @@
 #define RT_USING_I2C
 #define RT_USING_I2C_BITOPS
 #define RT_USING_PIN
+#define RT_USING_ADC
 #define RT_USING_PWM
 #define RT_USING_RTC
 #define RT_USING_SPI
@@ -136,7 +137,12 @@
 #define PKG_USING_MICROPYTHON
 
 /* Hardware Module */
-
+#define MICROPYTHON_USING_MACHINE_I2C
+#define MICROPYTHON_USING_MACHINE_SPI
+#define MICROPYTHON_USING_MACHINE_UART
+#define MICROPYTHON_USING_MACHINE_RTC
+#define MICROPYTHON_USING_MACHINE_PWM
+#define MICROPYTHON_USING_MACHINE_ADC
 
 /* System Module */
 
@@ -169,14 +175,18 @@
 
 
 /* Hardware Drivers Config */
-
-#define SOC_IMXRT1021DAG5A
 #define BSP_USING_QSPIFLASH
+#define SOC_IMXRT1021DAG5A
+
+/* Onboard Peripheral Drivers */
+
+
 /* On-chip Peripheral Drivers */
 
 #define BSP_USING_GPIO
 #define BSP_USING_LPUART
 #define BSP_USING_LPUART1
+#define BSP_USING_LPUART2
 #define BSP_USING_PWM
 #define BSP_USING_PWM1
 #define BSP_USING_PWM1_CH3
@@ -190,6 +200,8 @@
 #define BSP_USING_I2C1
 #define HW_I2C1_BADURATE_100kHZ
 #define BSP_USING_RTC
+#define BSP_USING_ADC
+#define BSP_USING_ADC1
 
 /* Onboard Peripheral Drivers */
 
