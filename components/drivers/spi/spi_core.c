@@ -14,7 +14,7 @@
  */
 
 #include <drivers/spi.h>
-
+#define TRANSFER_SIZE 64U /*! Transfer dataSize */
 extern rt_err_t rt_spi_bus_device_init(struct rt_spi_bus *bus, const char *name);
 extern rt_err_t rt_spidev_device_init(struct rt_spi_device *dev, const char *name);
 
@@ -230,6 +230,22 @@ rt_err_t rt_spi_send_then_recv(struct rt_spi_device *device,
         message.next       = RT_NULL;
 
         result = device->bus->ops->xfer(device, &message);
+//    uint32_t i;
+//uint8_t masterRxData[TRANSFER_SIZE] = {0U};
+//uint8_t masterTxData[TRANSFER_SIZE] = {0U};
+//    for (i = 0; i < 64; i++)
+//    {
+//        masterTxData[i] = i % 256;
+//        masterRxData[i] = 0;
+//    }
+//        message.send_buf   = (uint8_t*)(masterTxData);
+//        message.recv_buf   = (uint8_t*)(masterRxData);;
+//        message.length     = 64;
+//        message.cs_take    = 1;
+//        message.cs_release = 1;
+//        message.next       = RT_NULL;
+
+//        result = device->bus->ops->xfer(device, &message);
         if (result == 0)
         {
             result = -RT_EIO;

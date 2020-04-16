@@ -38,7 +38,7 @@
 #include "py/objint.h"
 #include "py/objstr.h"
 #include "py/builtin.h"
-//typedef signed int   ssize_t;  /* Used for a count of bytes or an error indication. */
+
 #if MICROPY_ENABLE_COMPILER
 
 #define RULE_ACT_ARG_MASK       (0x0f)
